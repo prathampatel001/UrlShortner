@@ -114,7 +114,7 @@ export const updateUrlById = async (req:Request, res: Response, next: NextFuncti
       // Find and update the URL document by its ID
       const updatedUrl = await Url.findByIdAndUpdate(
         id,
-        { originalUrl: originalUrl }, // Use lowercase `originalUrl`
+        { originalUrl}, // Use lowercase `originalUrl`
         { new: true }
       );
   
@@ -124,6 +124,7 @@ export const updateUrlById = async (req:Request, res: Response, next: NextFuncti
   
       res.status(200).json({
         message: 'Short URL updated successfully',
+        data:updatedUrl
       });
     } catch (error) {
       console.error('Error updating short URL:', error);

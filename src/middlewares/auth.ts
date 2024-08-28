@@ -22,7 +22,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
 
   // Extract the token from the Authorization header
   const token = authHeader.split(' ')[1];
-  console.log(token);
+  // console.log(token);
   
   if (!token) {
     return res.status(401).json({ message: 'Access denied, no token provided' });
@@ -30,7 +30,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
 
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
-    console.log(decoded);
+    // console.log(decoded);
     
     // Assuming decoded token contains a userId
     req.headers.userId = (decoded as any).userId;
