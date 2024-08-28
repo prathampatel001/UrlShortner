@@ -4,6 +4,11 @@ export interface UrlInterface extends Document{
     originalUrl: string;
     shortUrl:string;
     userId:mongoose.Types.ObjectId;
+    advanceOptions: {
+        passwordProtection: boolean;
+        password?: string;
+    };
+    
 }
 const urlSchema= new Schema<UrlInterface>({
     originalUrl: {
@@ -20,6 +25,18 @@ const urlSchema= new Schema<UrlInterface>({
         ref: "User",
         required: true,
     },
+    advanceOptions: {
+        passwordProtection: {
+            type: Boolean,
+            default: false, // Default to false (no password protection)
+        },
+        password: {
+            type: String, // Optional field to store the password
+            required: function () {
+                return this.advanceOptions.passwordProtection; // Only required if password protection is enabled
+            },
+        },
+    }
 },{timestamps:true}
 
 );
