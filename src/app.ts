@@ -6,6 +6,7 @@ import authRoutes from "./auth/authRoutes";
 import { authenticateToken } from "./middlewares/auth";
 import UrlRoutes from "./URL/UrlRoutes";
 import sessionRoutes from "./session/sessionRoutes";
+import analyticsRoutes from "./analytics/analyticsRoutes";
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -23,6 +24,7 @@ app.use(authenticateToken)
 app.use(basePath,authRoutes)
 app.use(basePath,UrlRoutes)
 app.use(basePath,sessionRoutes)
+app.use(basePath,analyticsRoutes)
 
 
 app.use(globalErrorHandler);
