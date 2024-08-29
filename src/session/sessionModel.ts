@@ -22,6 +22,11 @@ export interface SessionInterface extends Document {
         os: string;
         browser: string;
     };
+    expired:boolean,
+    advanceOptions?: {
+        passwordProtection?: boolean; 
+        password?: string; 
+      };
 }
 
 // Create the schema for the Session
@@ -55,7 +60,19 @@ const sessionSchema = new Schema<SessionInterface>({
         deviceType: { type: String}, // e.g., Mobile, Desktop
         os: { type: String}, // e.g., Windows, macOS
         browser: { type: String }, // e.g., Chrome, Safari
-    }
+    },
+    expired:{
+        type: Boolean,
+    },
+    advanceOptions: {
+        passwordProtection: {
+          type: Boolean, // Indicates if password protection is enabled
+          default: false,
+        },
+        password: {
+          type: String, // Optional field to store the hashed password
+        },
+      },
 }, { timestamps: true });
 
 export const Session = mongoose.model<SessionInterface>('Session', sessionSchema);

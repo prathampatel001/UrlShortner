@@ -12,6 +12,7 @@ const generateShortUrl = (length: number = 6): string => {
 
 export const createShortUrl = async (req: Request, res: Response, next: NextFunction) => {
 
+
   const SALT_ROUNDS = 10; 
   try {
 
@@ -45,6 +46,16 @@ export const createShortUrl = async (req: Request, res: Response, next: NextFunc
       options.password = hashedPassword; // Save the hashed password
     }
 
+    //set the expiry time
+    if(advanceOptions?.expiresIn){
+      const expiryDate= new Date();
+      expiryDate.setHours(expiryDate.getHours()+advanceOptions?.expiresIn)
+      options.expiresIn=expiryDate;
+      
+    }
+
+  
+
     // Create and save the new URL with optional password protection
     const newUrl = new Url({
       originalUrl,
@@ -52,6 +63,7 @@ export const createShortUrl = async (req: Request, res: Response, next: NextFunc
       userId,
       advanceOptions:options
     });
+  
 
     await newUrl.save();
 
@@ -79,6 +91,11 @@ export const getShortUrl = async (req: Request, res: Response, next: NextFunctio
   
 
       const { advanceOptions } = urlDoc;
+      const PromotionalWebsiteLink='https://www.atomostech.com/';
+
+      if(advanceOptions?.expiresIn && new Date() > advanceOptions.expiresIn) {
+        return res.status(410).redirect(PromotionalWebsiteLink)
+      }
 
     // Check if password protection is enabled
     if (advanceOptions?.passwordProtection) {

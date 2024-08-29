@@ -7,9 +7,11 @@ export interface UrlInterface extends Document{
     advanceOptions: {
         passwordProtection: boolean;
         password?: string;
+        expiresIn?: Date;//Enter no. of hrs
     };
     
 }
+
 const urlSchema= new Schema<UrlInterface>({
     originalUrl: {
         type: String,
@@ -36,6 +38,10 @@ const urlSchema= new Schema<UrlInterface>({
                 return this.advanceOptions.passwordProtection; // Only required if password protection is enabled
             },
         },
+        expiresIn: {
+            type: Date,
+        },
+
     }
 },{timestamps:true}
 
