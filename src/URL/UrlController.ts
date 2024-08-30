@@ -57,8 +57,6 @@ const generateShortUrl = (length: number = 6): string => {
 
 export const createShortUrl = async (req: Request, res: Response, next: NextFunction) => {
 
-
-  
   try {
 
     // Retrieve the originalUrl, userId, and optional fields from the request body
@@ -179,7 +177,9 @@ export const getShortUrlWithPassword = async (req: Request, res: Response, next:
     
     const redirectUrl = url.toString(); 
     console.log(redirectUrl)
-    res.redirect(redirectUrl);
+    res.status(201).json({
+      message: 'Redirect to the Url',redirectUrl
+    });
     } catch (error) {
       console.error('Error retrieving short URL:', error);
       next(error);
@@ -223,7 +223,6 @@ export const getShortUrl = async (req: Request, res: Response, next: NextFunctio
       }
     }
 
-      
     // Parse the original URL to extract its query parameters
     const url = new URL(urlDoc.originalUrl);
     const originalParams = new URLSearchParams(url.search);
@@ -243,7 +242,10 @@ export const getShortUrl = async (req: Request, res: Response, next: NextFunctio
     
     const redirectUrl = url.toString(); 
     console.log(redirectUrl)
-    res.redirect(redirectUrl);
+    
+    res.status(201).json({
+      message: 'Redirect to the Url',redirectUrl
+    });
   } catch (error) {
     console.error('Error retrieving short URL:', error);
     next(error);
