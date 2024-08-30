@@ -200,7 +200,6 @@ export const getDeviceData = async (req: Request, res: Response, next: NextFunct
   }
 };
 
-
 //Redirected to our website
 export const getPromotionalWebsiteVisitInfo = async (req: Request, res: Response, next: NextFunction) => {
   try {

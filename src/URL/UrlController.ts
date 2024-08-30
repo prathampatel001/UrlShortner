@@ -22,6 +22,11 @@ export const createShortUrl = async (req: Request, res: Response, next: NextFunc
     if (!originalUrl) {
       return res.status(400).json({ message: 'Original URL is required' });
     }
+    try {
+      new URL(originalUrl); // Throws an error if invalid
+    } catch (error) {
+      return res.status(400).json({ message: 'Invalid URL format' });
+    }
 
     // Generate a unique short URL code
     let shortUrl = generateShortUrl();
@@ -51,7 +56,6 @@ export const createShortUrl = async (req: Request, res: Response, next: NextFunc
       const expiryDate= new Date();
       expiryDate.setHours(expiryDate.getHours()+advanceOptions?.expiresIn)
       options.expiresIn=expiryDate;
-      
     }
 
   
@@ -77,7 +81,7 @@ export const createShortUrl = async (req: Request, res: Response, next: NextFunc
   }
 };
 
-export const getShortUrl = async (req: Request, res: Response, next: NextFunction) => {
+export const getShortUrlWithPassword = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
       const { password } = req.body; // Retrieve password from request body if provided
@@ -94,7 +98,7 @@ export const getShortUrl = async (req: Request, res: Response, next: NextFunctio
       const PromotionalWebsiteLink='https://www.atomostech.com/';
 
       if(advanceOptions?.expiresIn && new Date() > advanceOptions.expiresIn) {
-        return res.status(410).redirect(PromotionalWebsiteLink)
+        return res.status(410).send({message:"Url Expired...Redirecting"})
       }
 
     // Check if password protection is enabled
@@ -111,13 +115,96 @@ export const getShortUrl = async (req: Request, res: Response, next: NextFunctio
       }
     }
 
-      // If no password protection or correct password is provided, redirect to the original URL
-      res.redirect(urlDoc.originalUrl);
+    // Parse the original URL to extract its query parameters
+    const url = new URL(urlDoc.originalUrl);
+    const originalParams = new URLSearchParams(url.search);
+
+    for (const [key, value] of Object.entries(req.query)) {
+      if (Array.isArray(value)) {
+        // Set the key to the last value if it's an array
+        originalParams.set(key, value[value.length - 1] as string);
+      } else {
+        originalParams.set(key, value as string); // Replace if exists, or add if it doesn't
+      }
+    }
+
+
+    // Update the search parameters of the URL object
+    url.search = originalParams.toString();
+    
+    const redirectUrl = url.toString(); 
+    console.log(redirectUrl)
+    res.redirect(redirectUrl);
     } catch (error) {
       console.error('Error retrieving short URL:', error);
       next(error);
     }
   };
+
+
+export const getShortUrl = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const { password } = req.body; // Retrieve password from request body if provided
+
+    // Find the corresponding Url document using the shortUrl
+    const urlDoc = await Url.findOne({ shortUrl: id });
+
+    if (!urlDoc) {
+      return res.status(404).json({ message: 'Short URL not found' });
+    }
+
+    const { advanceOptions } = urlDoc;
+    const PromotionalWebsiteLink = 'https://www.atomostech.com/';
+
+    // Check if the URL is expired
+    if (advanceOptions?.expiresIn && new Date() > advanceOptions.expiresIn) {
+      // Send an HTML response with a message and redirect after a few seconds
+      return res.status(410).send({message:"Url Expired...Redirect to the Website"})
+       
+    }
+
+    // Check if password protection is enabled
+    if (advanceOptions?.passwordProtection) {
+      // Verify if the correct password is provided
+      if (!password) {
+        return res.status(403).json({ message: 'Password is required' });
+      }
+
+      // Compare the provided password with the hashed password stored in the database
+      const isMatch = await bcrypt.compare(password, advanceOptions.password || '');
+      if (!isMatch) {
+        return res.status(403).json({ message: 'Incorrect password' });
+      }
+    }
+
+      
+    // Parse the original URL to extract its query parameters
+    const url = new URL(urlDoc.originalUrl);
+    const originalParams = new URLSearchParams(url.search);
+
+    for (const [key, value] of Object.entries(req.query)) {
+      if (Array.isArray(value)) {
+        // Set the key to the last value if it's an array
+        originalParams.set(key, value[value.length - 1] as string);
+      } else {
+        originalParams.set(key, value as string); // Replace if exists, or add if it doesn't
+      }
+    }
+
+
+    // Update the search parameters of the URL object
+    url.search = originalParams.toString();
+    
+    const redirectUrl = url.toString(); 
+    console.log(redirectUrl)
+    res.redirect(redirectUrl);
+  } catch (error) {
+    console.error('Error retrieving short URL:', error);
+    next(error);
+  }
+};
+
   
 
 export const deleteShortUrlById = async (req: Request, res: Response, next: NextFunction) => {
