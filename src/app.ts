@@ -20,7 +20,7 @@ const basePath = "/api";
 
 app.use(basePath,authPublicRoutes)
 
-// app.use(authenticateToken)
+app.use(authenticateToken)
 app.use(basePath,authRoutes)
 app.use(basePath,UrlRoutes)
 app.use(basePath,sessionRoutes)

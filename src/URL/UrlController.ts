@@ -9,11 +9,56 @@ import crypto from 'crypto'; // We'll use this to generate a unique short URL co
 const generateShortUrl = (length: number = 6): string => {
     return crypto.randomBytes(Math.ceil(length / 2)).toString('hex').slice(0, length);
   };
+  const SALT_ROUNDS = 10; 
+
+  export const createShortUrlNoLogin = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+  
+      // Retrieve the originalUrl, userId, and optional fields from the request body
+      const { originalUrl} = req.body;
+  
+      if (!originalUrl) {
+        return res.status(400).json({ message: 'Original URL is required' });
+      }
+      try {
+        new URL(originalUrl); // Throws an error if invalid
+      } catch (error) {
+        return res.status(400).json({ message: 'Invalid URL format' });
+      }
+  
+      // Generate a unique short URL code
+      let shortUrl = generateShortUrl();
+  
+      // Ensure the generated short URL is unique
+      let existingUrl = await Url.findOne({ shortUrl });
+      while (existingUrl) {
+        shortUrl = generateShortUrl();
+        existingUrl = await Url.findOne({ shortUrl });
+      }
+  
+      // Create and save the new URL with optional password protection
+      const newUrl = new Url({
+        originalUrl,
+        shortUrl,
+      });
+    
+  
+      await newUrl.save();
+  
+      res.status(201).json({
+        message: 'Short URL created successfully',
+        data: newUrl,
+      });
+    } catch (error) {
+      console.error('Error creating short URL:', error);
+      next(error);
+    }
+  };
 
 export const createShortUrl = async (req: Request, res: Response, next: NextFunction) => {
 
 
-  const SALT_ROUNDS = 10; 
+  
   try {
 
     // Retrieve the originalUrl, userId, and optional fields from the request body
@@ -228,21 +273,52 @@ export const deleteShortUrlById = async (req: Request, res: Response, next: Next
     }
   };
 
-export const updateUrlById = async (req:Request, res: Response, next: NextFunction) => {
+  export const updateUrlById = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      const { originalUrl } = req.body; // Ensure this matches your request payload
+      const { originalUrl, advanceOptions } = req.body; // Ensure this matches your request payload
   
       if (!originalUrl) {
         return res.status(400).json({ message: 'New original URL is required' });
       }
   
+      // Retrieve the existing URL document
+      const urlDoc = await Url.findById(id);
+  
+      if (!urlDoc) {
+        return res.status(404).json({ message: 'Short URL not found' });
+      }
+  
+      // Prepare the updates
+      const updates: any = { originalUrl };
+  
+      if (advanceOptions) {
+        // Prepare advanceOptions updates
+        const newAdvanceOptions: any = { ...urlDoc.advanceOptions }; // Start with existing advanceOptions
+  
+        // Handle password protection
+        if (advanceOptions.passwordProtection !== undefined) {
+          newAdvanceOptions.passwordProtection = advanceOptions.passwordProtection;
+        }
+  
+        if (advanceOptions.password) {
+          // Hash the new password before saving
+          const hashedPassword = await bcrypt.hash(advanceOptions.password, SALT_ROUNDS);
+          newAdvanceOptions.password = hashedPassword;
+        }
+  
+        // Handle expiry time
+        if (advanceOptions.expiresIn) {
+          const expiryDate = new Date();
+          expiryDate.setHours(expiryDate.getHours() + advanceOptions.expiresIn);
+          newAdvanceOptions.expiresIn = expiryDate;
+        }
+  
+        updates.advanceOptions = newAdvanceOptions; // Assign updated advanceOptions to updates
+      }
+  
       // Find and update the URL document by its ID
-      const updatedUrl = await Url.findByIdAndUpdate(
-        id,
-        { originalUrl}, // Use lowercase `originalUrl`
-        { new: true }
-      );
+      const updatedUrl = await Url.findByIdAndUpdate(id, updates, { new: true });
   
       if (!updatedUrl) {
         return res.status(404).json({ message: 'Short URL not found' });
@@ -250,13 +326,14 @@ export const updateUrlById = async (req:Request, res: Response, next: NextFuncti
   
       res.status(200).json({
         message: 'Short URL updated successfully',
-        data:updatedUrl
+        data: updatedUrl,
       });
     } catch (error) {
       console.error('Error updating short URL:', error);
       next(error);
     }
   };
+  
   
   
   

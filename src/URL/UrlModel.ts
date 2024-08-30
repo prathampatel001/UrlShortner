@@ -25,7 +25,7 @@ const urlSchema= new Schema<UrlInterface>({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-        required: true,
+        // required: true,
     },
     advanceOptions: {
         passwordProtection: {

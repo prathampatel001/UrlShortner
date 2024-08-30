@@ -15,7 +15,7 @@ import { Session } from '../session/sessionModel';
     }
 
     // Get the number of sessions (clicks) associated with this URL
-    const clickCount = await Session.countDocuments({ url_id: urlDoc._id });
+    const clickCount = await Session.countDocuments({ url_id: urlDoc._id ,expired:false });
 
     res.status(200).json({
       originalUrl: urlDoc.originalUrl,
