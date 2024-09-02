@@ -105,7 +105,9 @@ export const getShortUrlWithPassword = async (req: Request, res: Response, next:
     }
 
     const redirectUrl = appendQueryParamsToUrl(urlDoc.originalUrl, req.query); 
-    res.redirect(redirectUrl)
+    // res.redirect(redirectUrl)
+ 
+    res.json({redirectUrl})
     } catch (error) {
       console.error('Error retrieving short URL:', error);
       next(error);
