@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { Url } from '../URL/UrlModel'; // Adjust the path to your model as necessary
 import bcrypt from 'bcrypt'; 
-import { getUniqueShortUrl, isValidUrl ,generateShortUrl} from '../middlewares/helper';
+import { getUniqueShortUrl, isValidUrl ,generateShortUrl, appendQueryParamsToUrl} from '../middlewares/helper';
 
   const SALT_ROUNDS = 10; 
 
@@ -104,29 +104,8 @@ export const getShortUrlWithPassword = async (req: Request, res: Response, next:
       }
     }
 
-    // Parse the original URL to extract its query parameters
-    const url = new URL(urlDoc.originalUrl);
-    const originalParams = new URLSearchParams(url.search);
-
-    for (const [key, value] of Object.entries(req.query)) {
-      if (Array.isArray(value)) {
-        // Set the key to the last value if it's an array
-        originalParams.set(key, value[value.length - 1] as string);
-      } else {
-        originalParams.set(key, value as string); // Replace if exists, or add if it doesn't
-      }
-    }
-
-
-    // Update the search parameters of the URL object
-    url.search = originalParams.toString();
-    
-    const redirectUrl = url.toString(); 
-    console.log(redirectUrl)
-    res.status(201).json({
-      message: 'Redirect to the Url',redirectUrl,
-      advanceOptions: urlDoc.advanceOptions
-    });
+    const redirectUrl = appendQueryParamsToUrl(urlDoc.originalUrl, req.query); 
+    res.redirect(redirectUrl)
     } catch (error) {
       console.error('Error retrieving short URL:', error);
       next(error);
@@ -268,5 +247,37 @@ export const updateUrlById = async (req: Request, res: Response, next: NextFunct
   };
   
   
+  export const redirectToWebsite =async(req:Request,res:Response)=>{
+
+    try {
+      const {shortCode }=req.params
+    
+  
+      // Find the corresponding Url document using the shortUrl
+      const urlDoc = await Url.findOne({ shortUrl: shortCode });
+  
+      console.log(urlDoc)
+  
+      if (!urlDoc) {
+        return res.status(404).json({ message: 'Short URL not found' });
+      }
+      const { advanceOptions } = urlDoc;
+  
+      if(advanceOptions?.expiresIn && new Date() > advanceOptions.expiresIn) {
+        return res.status(410).send({message:"Url Expired...Redirecting"})
+      }
+      // Check if the URL is expired
+      if (advanceOptions.passwordProtection===true) {
+      return  res.redirect(`http://localhost:3000/password-protection/${shortCode}`)
+      }
+  
+      const redirectUrl = appendQueryParamsToUrl(urlDoc.originalUrl, req.query); 
+      // console.log(redirectUrl)
+      // res.redirect(`https://pratham.com/${code}`)
+      res.redirect(redirectUrl)
+    } catch (error) {
+      console.log("error in redirect",error);
+    }
+  }
   
   

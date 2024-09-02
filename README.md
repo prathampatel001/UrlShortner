@@ -42,6 +42,7 @@ Output:
   }
 ```
 
+<Hr color="grey">
 <h3>Login User(Method : Post)</h3>
 
  ```
@@ -65,6 +66,7 @@ Output:
 ```
 
 
+<Hr color="grey">
 <h3>Get User(Method : Get)</h3>
 
 ```
@@ -87,7 +89,21 @@ Output:Gets the current logged in users data
 
 ## Url
 
+<h3>Redirect to Website(Method : Get)</h3>
 
+```
+http://localhost:1234/:shortCode
+```
+
+Outputs:
+```
+Redirect to the Original website
+```
+else
+```
+Redirect to /password-protection/:shortcode
+```
+<Hr color="grey">
 <h3>Create ShortUrl for logged in user(Method : Post)</h3>
 
 ```
@@ -129,6 +145,8 @@ Output:
 }
 ```
 
+<Hr color="grey">
+
 <h3>Create ShortUrl without login(Method : Post)</h3>
 
 ```
@@ -162,7 +180,7 @@ Output:
 
 
 
-
+<Hr color="grey">
 
 <h3>Get Short Url(Method : Get)</h3>
 
@@ -306,7 +324,7 @@ Output:
   }
 ```
 
-
+<Hr color="grey">
 <h3>Validate password and redirect(Method : Post)</h3>
 
   ```
@@ -324,6 +342,8 @@ Output:If the password is correct
 ```
 Redirected to the OriginalUrl
 ```
+
+<Hr color="grey">
 <h3>Delete Session(Method : Delete)</h3>
 
 ```
@@ -361,7 +381,7 @@ Output:
 
 
 
-
+<Hr color="grey">
 <h3>Get all Url Count(Method : Get)</h3>
 
 
@@ -401,6 +421,8 @@ Output:
     ]
   }
 ```
+
+<Hr color="grey">
 <h3>Get GeoData(Method : Get)</h3>
 
 ```
@@ -433,6 +455,8 @@ Output:
       ]
   }
 ```
+
+<Hr color="grey">
 
 <h3>Get Device Data(Method : Get)</h3>
 
@@ -482,6 +506,7 @@ Output:
   }
 ```
 
+<Hr color="grey">
 <h3>Get redirected to the promotional website(Method : Get)</h3>
 
 ```
