@@ -44,6 +44,8 @@ export const createSession = async (req: Request, res: Response, next: NextFunct
     const countryFullName = Country.getCountryByCode(user_country)?.name || user_country;
     const stateFullName = State.getStateByCodeAndCountry(user_region, user_country)?.name || user_region;
 
+    // console.log(stateFullName)
+
     // Check for password protection and store it
     const passwordProtectionData = advanceOptions?.passwordProtection
       ? {

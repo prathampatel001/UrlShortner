@@ -3,7 +3,7 @@ import { Url } from '../URL/UrlModel'; // Adjust the path to your model as neces
 import bcrypt from 'bcrypt'; 
 import { getUniqueShortUrl, isValidUrl ,generateShortUrl, appendQueryParamsToUrl} from '../middlewares/helper';
 
-  const SALT_ROUNDS = 10; 
+const SALT_ROUNDS = 10; 
 
 export const createShortUrl = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -213,7 +213,7 @@ export const updateUrlById = async (req: Request, res: Response, next: NextFunct
   
       const urlDoc = await Url.findById(id);
       if (!urlDoc) {
-        return res.status(404).json({ message: 'Short URL not found' });
+        return res.status(404).json({ message: 'URL not found' });
       }
   
       const updates: any = { originalUrl };

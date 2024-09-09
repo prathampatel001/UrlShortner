@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getAllUrlCounts, getDeviceData, getGeoData, getPromotionalWebsiteVisitInfo, singleUrlCount } from './analyticsController';
+import { filterAnalyticsByDeviceGeoInfoAndTimeStamp, getAllUrlCounts, getDeviceData, getGeoData, getPromotionalWebsiteVisitInfo, singleUrlCount } from './analyticsController';
 
 const router = Router();
 
@@ -10,6 +10,9 @@ router.get('/analytics/geoInfo/:id',getGeoData)
 router.get('/analytics/deviceInfo/:id',getDeviceData)
 router.get('/analytics/redirectToPromotionalWeb',getPromotionalWebsiteVisitInfo)
 
+//Filter routes
+// router.get('/analytics/filter/date', filterAnalyticsByDeviceGeoInfoAndDate);
+router.get('/analytics/filter/timeRange', filterAnalyticsByDeviceGeoInfoAndTimeStamp);
 
 
 export default router;
