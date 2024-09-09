@@ -58,17 +58,32 @@ export const getAllUrlCounts = async (req: Request, res: Response, next: NextFun
           clicks: { $size: '$sessionData' }, // Count the number of non-expired sessions
         },
       },
+      {
+        $facet: {
+          urlData: [
+            { $match: {} } // To allow for additional filtering if needed in the future
+          ],
+          totalCount: [
+            { $count: 'totalDocuments' } // Count the total number of documents in the pipeline
+          ],
+        },
+      },
     ]);
+
+    // Extract data from the facet result
+    const { urlData, totalCount } = urlClickData[0] || { urlData: [], totalCount: [] };
 
     res.status(200).json({
       message: 'All URLs and their click counts',
-      data: urlClickData,
+      data: urlData,
+      totalCount: totalCount.length > 0 ? totalCount[0].totalDocuments : 0, // Get the total document count
     });
   } catch (error) {
     console.error('Error fetching all URLs and their click counts:', error);
     next(error);
   }
 };
+
 
 
 // GeoData
