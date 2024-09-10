@@ -271,6 +271,11 @@ export const getPromotionalWebsiteVisitInfo = async (req: Request, res: Response
 //     const startDate = new Date(startDateParam as string)
 //     const endDate = new Date(endDateParam as string);
 
+//     console.log(startDate);
+//     console.log(endDate);
+    
+    
+
 //     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || endDate < startDate) {
 //       return res.status(400).json({ message: 'Invalid or inconsistent date range provided' });
 //     }
@@ -341,59 +346,3 @@ export const filterAnalyticsByDeviceGeoInfoAndTimeStamp = async (req: Request, r
     next(error);
   }
 };
-
-// export const filterAnalyticsByDeviceGeoInfoAndDate = async (req: Request, res: Response, next: NextFunction) => {
-//   try {
-//     const { country, os, state, browser, startDate: startDateParam, endDate: endDateParam, deviceType } = req.query; // Accept country, OS, state, browser, startDate, and endDate as query parameters
-
-//     const filter: any = {};
-
-//     if (country) {
-//       filter['geoData.country'] = country;
-//     }
-//     if (state) {
-//       filter['geoData.state'] = state;
-//     }
-
-//     if (os) {
-//       filter['deviceInfo.os'] = os;
-//     }
-
-//     if (deviceType) {
-//       filter['deviceInfo.deviceType'] = deviceType;
-//     }
-
-//     if (browser) {
-//       filter['deviceInfo.browser'] = browser;
-//     }
-
-//     // Handle date range filtering with string input
-//     if (startDateParam && endDateParam) {
-//       const startDate = new Date(startDateParam as string);
-//       const endDate = new Date(endDateParam as string);
-
-//       // Validate that the startDate and endDate are valid dates
-//       if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || endDate < startDate) {
-//         return res.status(400).json({ message: 'Invalid or inconsistent date range provided' });
-//       }
-
-//       // Add date range filter to the query
-//       filter['createdAt'] = { $gte: startDate, $lte: endDate };
-//     } else {
-//       return res.status(400).json({ message: 'startDate and endDate are required as valid date strings' });
-//     }
-
-//     // Find sessions that match the provided filters
-//     const sessions = await Session.find(filter);
-
-//     res.status(200).json({
-//       message: 'Filtered sessions by country, OS, device type, browser, and date range',
-//       data: sessions,
-//     });
-//   } catch (error) {
-//     console.error('Error filtering sessions by device, geographic information, or date range:', error);
-//     next(error);
-//   }
-// };
-
-

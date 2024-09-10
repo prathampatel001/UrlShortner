@@ -7,7 +7,12 @@ export interface UrlInterface extends Document{
     advanceOptions: {
         passwordProtection: boolean;
         password?: string;
-        expiresIn?: Date;//Enter no. of hrs
+        expiresIn?: Date;//Enter no. of hrs Example- 1
+        iosAndroidTargeting?: {
+            enabled: boolean; // Indicates if iOS/Android targeting is enabled
+            androidLink?: string; // URL for Android devices
+            iosLink?: string; // URL for iOS devices
+          };
     };
     
 }
@@ -41,6 +46,18 @@ const urlSchema= new Schema<UrlInterface>({
         expiresIn: {
             type: Date,
         },
+        iosAndroidTargeting: {
+            enabled: {
+              type: Boolean,
+              default: false, // Default to false (no device targeting)
+            },
+            androidLink: {
+              type: String, // Field to store the Android-specific URL
+            },
+            iosLink: {
+              type: String, // Field to store the iOS-specific URL
+            },
+          },
 
     }
 },{timestamps:true}

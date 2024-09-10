@@ -11,7 +11,7 @@ router.get('/analytics/deviceInfo/:id',getDeviceData)
 router.get('/analytics/redirectToPromotionalWeb',getPromotionalWebsiteVisitInfo)
 
 //Filter routes
-// router.get('/analytics/filter/date', filterAnalyticsByDeviceGeoInfoAndDate);
+// router.get('/analytics/filter/date', filterAnalyticsByTime);
 router.get('/analytics/filter/timeRange', filterAnalyticsByDeviceGeoInfoAndTimeStamp);
 
 

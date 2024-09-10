@@ -28,6 +28,21 @@ export const createShortUrl = async (req: Request, res: Response, next: NextFunc
         expiryDate.setHours(expiryDate.getHours() + advanceOptions.expiresIn);
         options.expiresIn = expiryDate;
       }
+
+      if(advanceOptions?.iosAndroidTargeting?.enabled){
+        if(!advanceOptions.iosAndroidTargeting.androidLink || !advanceOptions.iosAndroidTargeting.iosLink){
+          return res.status(400).json({
+            message:"Android and IOS both links are required"
+          });
+        }
+
+       
+        options.iosAndroidTargeting = {
+        enabled: true,
+        androidLink: advanceOptions.iosAndroidTargeting.androidLink,
+        iosLink: advanceOptions.iosAndroidTargeting.iosLink,
+      };
+      }
   
       const newUrl = new Url({ originalUrl, shortUrl, userId, advanceOptions: options });
       await newUrl.save();
@@ -104,7 +119,33 @@ export const getShortUrlWithPassword = async (req: Request, res: Response, next:
       }
     }
 
-    const redirectUrl = appendQueryParamsToUrl(urlDoc.originalUrl, req.query); 
+    if (advanceOptions?.iosAndroidTargeting?.enabled) {
+      if (!advanceOptions.iosAndroidTargeting.androidLink || !advanceOptions.iosAndroidTargeting.iosLink) {
+        return res.status(400).json({
+          message: 'Both Android and iOS links are required when iOS/Android targeting is enabled.',
+        });
+      }
+    }
+
+    // Detect the user's device type from the request headers
+    const userAgent = req.headers['user-agent']?.toLowerCase();
+
+    let redirectUrl = urlDoc.originalUrl; // Default to the original URL
+
+    // Check if iOS/Android targeting is enabled and perform redirection
+    if (advanceOptions?.iosAndroidTargeting?.enabled) {
+      if (userAgent) {
+        if (/android/.test(userAgent) && advanceOptions.iosAndroidTargeting.androidLink) {
+          // Redirect to the Android-specific link if it exists
+          redirectUrl = advanceOptions.iosAndroidTargeting.androidLink;
+        } else if (/iphone|ipad|ipod/.test(userAgent) && advanceOptions.iosAndroidTargeting.iosLink) {
+          // Redirect to the iOS-specific link if it exists
+          redirectUrl = advanceOptions.iosAndroidTargeting.iosLink;
+        }
+      }
+    }
+
+    redirectUrl = appendQueryParamsToUrl(urlDoc.originalUrl, req.query); 
     // res.redirect(redirectUrl)
  
     res.json({redirectUrl})
@@ -151,26 +192,34 @@ export const getShortUrl = async (req: Request, res: Response, next: NextFunctio
       }
     }
 
-    // Parse the original URL to extract its query parameters
-    const url = new URL(urlDoc.originalUrl);
-    const originalParams = new URLSearchParams(url.search);
-
-    for (const [key, value] of Object.entries(req.query)) {
-      if (Array.isArray(value)) {
-        // Set the key to the last value if it's an array
-        originalParams.set(key, value[value.length - 1] as string);
-      } else {
-        originalParams.set(key, value as string); // Replace if exists, or add if it doesn't
+    if(advanceOptions?.iosAndroidTargeting?.enabled){
+      if(!advanceOptions.iosAndroidTargeting.androidLink || !advanceOptions.iosAndroidTargeting.iosLink){
+        return res.status(400).json({
+          message:"Android and IOS both links are required"
+        });
       }
     }
 
+    
+    // Detect the user's device type from the request headers
+    const userAgent = req.headers['user-agent']?.toLowerCase();
 
-    // Update the search parameters of the URL object
-    url.search = originalParams.toString();
-    
-    const redirectUrl = url.toString(); 
-    console.log(redirectUrl)
-    
+    let redirectUrl = urlDoc.originalUrl; // Default to the original URL
+
+    // Check if iOS/Android targeting is enabled and perform redirection
+    if (advanceOptions?.iosAndroidTargeting?.enabled) {
+      if (userAgent) {
+        if (/android/.test(userAgent) && advanceOptions.iosAndroidTargeting.androidLink) {
+          // Redirect to the Android-specific link if it exists
+          redirectUrl = advanceOptions.iosAndroidTargeting.androidLink;
+        } else if (/iphone|ipad|ipod/.test(userAgent) && advanceOptions.iosAndroidTargeting.iosLink) {
+          // Redirect to the iOS-specific link if it exists
+          redirectUrl = advanceOptions.iosAndroidTargeting.iosLink;
+        }
+      }
+    }
+
+    redirectUrl = appendQueryParamsToUrl(urlDoc.originalUrl, req.query); 
     res.status(201).json({
       message: 'Redirect to the Url',redirectUrl,
       advanceOptions: urlDoc.advanceOptions
@@ -231,6 +280,43 @@ export const updateUrlById = async (req: Request, res: Response, next: NextFunct
           const expiryDate = new Date();
           expiryDate.setHours(expiryDate.getHours() + advanceOptions.expiresIn);
           newAdvanceOptions.expiresIn = expiryDate;
+        }
+
+        // if (advanceOptions.iosAndroidTargeting) {
+        //   // Validate that both links are provided if targeting is enabled
+        //   if (
+        //     advanceOptions.iosAndroidTargeting.enabled &&
+        //     (!advanceOptions.iosAndroidTargeting.androidLink || !advanceOptions.iosAndroidTargeting.iosLink)
+        //   ) {
+        //     return res.status(400).json({
+        //       message: 'Both Android and iOS links are required when iOS/Android targeting is enabled.',
+        //     });
+        //   }
+
+        //   newAdvanceOptions.iosAndroidTargeting = {
+        //     enabled: advanceOptions.iosAndroidTargeting.enabled,
+        //     androidLink: advanceOptions.iosAndroidTargeting.androidLink,
+        //     iosLink: advanceOptions.iosAndroidTargeting.iosLink,
+        //   };
+  
+        // }
+
+        if (advanceOptions.iosAndroidTargeting) {
+          const { enabled, androidLink, iosLink } = advanceOptions.iosAndroidTargeting;
+  
+          // Validate that both links are provided if targeting is enabled
+          if (enabled && (!androidLink || !iosLink)) {
+            return res.status(400).json({
+              message: 'Both Android and iOS links are required when iOS/Android targeting is enabled.',
+            });
+          }
+  
+          // Update targeting settings using a conditional operator
+          newAdvanceOptions.iosAndroidTargeting = {
+            enabled: enabled,
+            androidLink: enabled ? androidLink : undefined, // set only when enabled is true
+            iosLink: enabled ? iosLink : undefined,         
+          };
         }
   
         updates.advanceOptions = newAdvanceOptions;
